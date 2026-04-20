@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postal Ballot for Gen Election, 2028: Kolasib District</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { min-height: 100vh; background-color: #f8fafc; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+        .status-container { min-height: 3rem; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        const Icon = ({ name, className }) => {
+            useEffect(() => { if (window.lucide) { window.lucide.createIcons(); } }, [name]);
+            return <i data-lucide={name} className={className}></i>;
+        };
+
+        const locationData = {
+          "Kolasib District": { "4-Tuirial": 28, "5-Kolasib": 29, "6-Serlui": 31 },
+          "Mamit District": { "1-Hachhek": 35, "2-Dampa": 32, "3-Mamit": 30 },
+          "Aizawl District": { 
+            "7-Tuivawl": 25, "8-Chalfilh": 24, "9-Tawi": 26, "10-Aizawl North I": 28, 
+            "11-Aizawl North II": 27, "12-Aizawl North III": 29, "13-Aizawl East I": 30, 
+            "14-Aizawl East II": 28, "15-Aizawl West I": 31, "16-Aizawl West II": 29, 
+            "17-Aizawl West III": 32, "18-Aizawl South I": 30, "19-Aizawl South II": 28, "20-Aizawl South III": 31 
+          },
+          "Lunglei District": { "30-Lunglei North": 32, "31-Lunglei East": 30, "32-Lunglei West": 29, "33-Lunglei South": 28, "34-Thorang": 37 },
+          "Champhai District": { "21-Lengteng": 30, "22-Tuichang": 28, "23-Champhai North": 31, "24-Champhai South": 29 },
+          "Serchhip District": { "25-East Tuipui": 26, "26-Serchhip": 28, "27-Tuikum": 25 },
+          "Lawngtlai District": { "36-Tuichawng": 35, "37-Lawngtlai West": 32, "38-Lawngtlai East": 30 },
+          "Siaha District": { "39-Saiha": 37, "40-Palak": 34 },
+          "Saitual District": { "8-Chalfilh": 15, "9-Tawi": 12 },
+          "Khawzawl District": { "22-Tuichang": 14 },
+          "Hnahthial District": { "33-Lunglei South": 10 }
+        };
+
+        const InputField = ({ label, value, onChange, error, placeholder }) => (
+          <div className="w-full">
+            <label className="block text-sm font-bold text-gray-700 mb-1">{label}</label>
+            <input type="text" value={value} onChange={onChange} placeholder={placeholder}
+              className={`w-full px-4 py-2 border rounded-lg outline-none transition-all ${error ? 'border-red-500 bg-red-50' : 'border-gray-300 focus:ring-2 focus:ring-blue-500'}`} />
+            {error && <p className="text-red-500 text-[11px] mt-1 font-bold">{error}</p>}
+          </div>
+        );
+
+        const DropdownField = ({ label, value, onChange, error, options, disabled, defaultOption }) => (
+          <div className="w-full">
+            <label className="block text-sm font-bold text-gray-700 mb-1">{label}</label>
+            <select value={value} onChange={onChange} disabled={disabled}
+              className={`w-full px-4 py-2 border rounded-lg outline-none transition-all ${error ? 'border-red-500 bg-red-50' : 'border-gray-300 focus:ring-2 focus:ring-blue-500'} ${disabled ? 'bg-gray-0' : 'bg-white'}`}>
+              <option value="">{defaultOption}</option>
+              {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+            {error && <p className="text-red-500 text-[11px] mt-1 font-bold">{error}</p>}
+          </div>
+        );
+
+        const App = () => {
+          const [view, setView] = useState('portal');
+          const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqcd7Ne0dh41OsnBX9GiqDzKvbfYQRhaSn435GBtsLLihosK1M8-nysNlkkC8HVBsU2w/exec';
+
+          return (
+            <div className="p-4 md:p-8 min-h-screen">
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-black text-gray-600 uppercase tracking-tight">Data Entry Portal for Postal Ballot</h1>
+                <h2 className="text-4xl font-bold text-red-400 mt-1">Kolasib District</h2>
+                <h3 className="text-3xl font-bold text-blue-600 mt-1">General Election 2028</h3>
+              </div>
+
+              <button 
+                onClick={() => setView(view === 'portal' ? 'homeVoting' : 'portal')}
+                className="fixed top-6 right-6 z-50 bg-white border border-gray-500 shadow-md px-4 py-2 rounded-full flex items-center gap-2 hover:bg-gray-200 transition-all font-bold text-gray-700"
+              >
+                <Icon name="shuffle" className="h-4 w-4" />
+                Switch to {view === 'portal' ? 'Home Voting' : 'Election Duty'}
+              </button>
+
+              <div className="max-w-6xl mx-auto">
+                {view === 'portal' ? (
+                  <DataEntryPortal url={GOOGLE_SCRIPT_URL} locationData={locationData} />
+                ) : (
+                  <HomeVotingPortal url={GOOGLE_SCRIPT_URL} locationData={locationData} />
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        const DataEntryPortal = ({ url, locationData }) => {
+          const initial = { name: '', address: '', phoneNo: '', district: '', assemblyConstituency: '', partNo: '', serialNo: '', epicNo: '', natureOfDuty: '' };
+          const [form, setForm] = useState(initial);
+          const [errs, setErrs] = useState({});
+          const [status, setStatus] = useState(null);
+
+          const checkDuplicate = async (epic) => {
+            try {
+              const fetchUrl = `${url}?epic=${encodeURIComponent(epic.trim())}&sheetTarget=${encodeURIComponent('Election Duty')}`;
+              const res = await fetch(fetchUrl);
+              const json = await res.json();
+              return json.exists === true;
+            } catch (e) { 
+              console.error("Duplicate check failed", e);
+              return false; 
+            }
+          };
+
+          const validate = () => {
+            const e = {};
+            if (!form.name.trim()) e.name = "Name is required";
+            if (!form.address.trim()) e.address = "Address is required";
+            if (!/^[0-9]{10}$/.test(form.phoneNo)) e.phoneNo = "Valid 10 digit number required";
+            if (!form.district) e.district = "District required";
+            if (!form.assemblyConstituency) e.assemblyConstituency = "AC required";
+            if (!form.partNo) e.partNo = "Part No required";
+            if (!form.serialNo.trim()) e.serialNo = "Serial No required";
+	    if (!/^[A-Za-z]{3}[0-9]{7}$/.test(form.epicNo)) e.epicNo = "Invalid Format";
+            
+            // EPIC Validation: 3 letters + 7 numbers
+            const epicRegex = /^[A-Za-z]{3}[0-9]{7}$/;
+            if (!form.epicNo.trim()) {
+              e.epicNo = "EPIC No required";
+            } else if (!epicRegex.test(form.epicNo.trim())) {
+              e.epicNo = "Format: 3 Letters + 7 Numbers (e.g. ABC1234567)";
+            }
+
+            if (!form.natureOfDuty) e.natureOfDuty = "Nature of Duty required";
+            setErrs(e);
+            return Object.keys(e).length === 0;
+          };
+
+          const submit = async (e) => {
+            e.preventDefault();
+            if (!validate() || status === 'loading') return;
+            
+            setStatus('loading');
+            
+            const isDuplicate = await checkDuplicate(form.epicNo);
+            if (isDuplicate) {
+              setErrs(prev => ({ ...prev, epicNo: "DUPLICATE ENTRY: This EPIC No has already been submitted." }));
+              setStatus('error');
+              return; // Stop here
+            }
+
+            try {
+              await fetch(url, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({...form, sheetTarget: 'Election Duty'}) 
+              });
+              
+              setStatus('success');
+              setForm(initial); 
+              setErrs({});
+              setTimeout(() => setStatus(null), 3000);
+            } catch (err) { 
+              setStatus('error'); 
+              setTimeout(() => setStatus(null), 4000);
+            }
+          };
+
+          return (
+            <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-black text-gray-800">Election Duty Form</h2>
+                {status === 'loading' && <div className="flex items-center text-blue-600 font-bold gap-2 animate-pulse"><Icon name="loader" className="animate-spin h-5 w-5" /> Verifying EPIC No...</div>}
+              </div>
+              
+              <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <InputField label="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} error={errs.name} placeholder="Full Name" />
+                <InputField label="Address" value={form.address} onChange={e => setForm({...form, address: e.target.value})} error={errs.address} placeholder="Current Address" />
+                <InputField label="Phone No" value={form.phoneNo} onChange={e => setForm({...form, phoneNo: e.target.value})} error={errs.phoneNo} placeholder="10 Digits Mobile No" />
+                
+                <DropdownField label="District" value={form.district} options={Object.keys(locationData)} error={errs.district} onChange={e => setForm({...form, district: e.target.value, assemblyConstituency: '', partNo: ''})} defaultOption="Select District" />
+                <DropdownField label="Assembly Constituency" value={form.assemblyConstituency} options={form.district ? Object.keys(locationData[form.district]) : []} error={errs.assemblyConstituency} onChange={e => setForm({...form, assemblyConstituency: e.target.value, partNo: ''})} disabled={!form.district} defaultOption="Select A/C" />
+                <DropdownField label="Part No" value={form.partNo} options={form.assemblyConstituency ? Array.from({length: locationData[form.district][form.assemblyConstituency]}, (_, i) => (i+1).toString()) : []} error={errs.partNo} onChange={e => setForm({...form, partNo: e.target.value})} disabled={!form.assemblyConstituency} defaultOption="Select Part" />
+                
+                <InputField label="Serial No" value={form.serialNo} onChange={e => setForm({...form, serialNo: e.target.value})} error={errs.serialNo} placeholder="Serial no in Part" />
+                <InputField label="EPIC No" value={form.epicNo} onChange={e => {setForm({...form, epicNo: e.target.value}); setErrs({...errs, epicNo: null});}} error={errs.epicNo} placeholder="ABC1234567" />
+		 <DropdownField label="Nature of Duty" value={form.natureOfDuty} options={["Election Officials", "Polling Officials", "Security(SP)", "Security(IR)", "Driver"]} error={errs.natureOfDuty} onChange={e => setForm({...form, natureOfDuty: e.target.value})} defaultOption="Select Nature of Duty" />
+                
+                <div className="md:col-span-3 flex justify-between items-center pt-6 border-t mt-4">
+                  <button type="button" onClick={() => {setForm(initial); setErrs({}); setStatus(null);}} className="text-gray-400 hover:text-red-500 font-bold flex items-center gap-2 transition-colors">
+                    <Icon name="rotate-ccw" className="h-4 w-4"/> Reset Form
+                  </button>
+                  <button type="submit" disabled={status === 'loading'} className={`px-10 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center gap-3 ${status === 'loading' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}>
+                    <Icon name="send" className="h-5 w-5" /> Submit Data
+                  </button>
+                </div>
+              </form>
+              
+              <div className="status-container mt-4">
+                {status === 'success' && <div className="bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 font-bold fade-in flex items-center gap-2"><Icon name="check-circle" className="h-5 w-5" /> Data recorded successfully.</div>}
+                {status === 'error' && <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 font-bold fade-in flex items-center gap-2"><Icon name="alert-circle" className="h-5 w-5" /> {errs.epicNo || "Error submitting data. Please try again."}</div>}
+              </div>
+            </div>
+          );
+        };
+
+        const HomeVotingPortal = ({ url, locationData }) => {
+          const initial = { name: '', address: '', phoneNo: '', epicNo: '', assemblyConstituency: '', partNo: '', serialNo: '', category: '' };
+          const [form, setForm] = useState(initial);
+          const [errs, setErrs] = useState({});
+          const [status, setStatus] = useState(null);
+
+          const checkDuplicate = async (epic) => {
+            try {
+              const fetchUrl = `${url}?epic=${encodeURIComponent(epic.trim())}&sheetTarget=${encodeURIComponent('Home Voting')}`;
+              const res = await fetch(fetchUrl);
+              const json = await res.json();
+              return json.exists === true;
+            } catch (e) { return false; }
+          };
+
+          const validate = () => {
+            const e = {};
+            if (!form.name.trim()) e.name = "Required";
+            if (!form.address.trim()) e.address = "Required";
+            if (!/^[0-9]{10}$/.test(form.phoneNo)) e.phoneNo = "Invalid";
+            
+            // EPIC Validation: 3 letters + 7 numbers
+            const epicRegex = /^[A-Za-z]{3}[0-9]{7}$/;
+            if (!form.epicNo.trim()) {
+              e.epicNo = "Required";
+            } else if (!epicRegex.test(form.epicNo.trim())) {
+              e.epicNo = "Format: 3 Letters + 7 Numbers";
+            }
+
+            if (!form.assemblyConstituency) e.assemblyConstituency = "Required";
+            if (!form.partNo) e.partNo = "Required";
+            if (!form.serialNo.trim()) e.serialNo = "Required";
+            if (!form.category) e.category = "Required";
+            setErrs(e);
+            return Object.keys(e).length === 0;
+          };
+
+          const submit = async (e) => {
+            e.preventDefault();
+            if (!validate() || status === 'loading') return;
+            setStatus('loading');
+
+            const isDuplicate = await checkDuplicate(form.epicNo);
+            if (isDuplicate) {
+              setErrs(prev => ({ ...prev, epicNo: "DUPLICATE: Voter with this EPIC No already registered." }));
+              setStatus('error');
+              return;
+            }
+
+            try {
+              await fetch(url, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({...form, sheetTarget: 'Home Voting'}) 
+              });
+              setStatus('success');
+              setForm(initial);
+              setErrs({});
+              setTimeout(() => setStatus(null), 3000);
+            } catch (err) { 
+              setStatus('error'); 
+              setTimeout(() => setStatus(null), 4000);
+            }
+          };
+
+          return (
+            <div className="bg-white p-8 rounded-2xl shadow-xl border border-orange-100 fade-in">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-black text-gray-800">Home Voting Form</h2>
+                {status === 'loading' && <div className="flex items-center text-orange-600 font-bold gap-2 animate-pulse"><Icon name="loader" className="animate-spin h-5 w-5" /> Verifying EPIC No...</div>}
+              </div>
+
+              <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 opacity-100">
+                <InputField label="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} error={errs.name} placeholder="Full Name" />
+                <InputField label="Detail Address" value={form.address} onChange={e => setForm({...form, address: e.target.value})} error={errs.address} placeholder="Detail Address" />
+                <InputField label="Phone No" value={form.phoneNo} onChange={e => setForm({...form, phoneNo: e.target.value})} error={errs.phoneNo} placeholder="10 Digits Mobile No" />
+                <InputField label="EPIC No" value={form.epicNo} onChange={e => {setForm({...form, epicNo: e.target.value}); setErrs({...errs, epicNo: null});}} error={errs.epicNo} placeholder="ABC1234567" />
+                
+                <DropdownField label="Assembly Constituency" value={form.assemblyConstituency} options={["4-Tuirial", "5-Kolasib", "6-Serlui"]} error={errs.assemblyConstituency} onChange={e => setForm({...form, assemblyConstituency: e.target.value, partNo: ''})} defaultOption="Select A/C" />
+                <DropdownField label="Part No" value={form.partNo} disabled={!form.assemblyConstituency} 
+                  options={form.assemblyConstituency ? Array.from({length: locationData["Kolasib District"][form.assemblyConstituency]}, (_, i) => (i+1).toString()) : []} 
+                  error={errs.partNo} onChange={e => setForm({...form, partNo: e.target.value})} defaultOption="Select Part" />
+                <InputField label="Serial No" value={form.serialNo} onChange={e => setForm({...form, serialNo: e.target.value})} error={errs.serialNo} placeholder="Serial No in Part" />
+                <DropdownField label="Category" value={form.category} options={["AVES", "AVPD"]} onChange={e => setForm({...form, category: e.target.value})} error={errs.category} defaultOption="Select Category" />
+
+                <div className="lg:col-span-4 flex justify-between items-center pt-6 border-t mt-4">
+                  <button type="button" onClick={() => {setForm(initial); setErrs({}); setStatus(null);}} className="text-gray-400 hover:text-red-500 font-bold flex items-center gap-2 transition-colors">
+                    <Icon name="rotate-ccw" className="h-5 w-5"/> Reset Form
+                  </button>
+                  <button type="submit" disabled={status === 'loading'} className={`px-10 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center gap-3 ${status === 'loading' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}>
+                    <Icon name="send" className="h-5 w-5" /> Submit Data
+                  </button>
+                </div>
+              </form>
+              
+              <div className="status-container mt-4">
+                {status === 'success' && <div className="bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 font-bold text-center fade-in flex items-center justify-center gap-2"><Icon name="check-circle" className="h-5 w-5" /> Data recorded successfully.</div>}
+                {status === 'error' && <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 font-bold text-center fade-in flex items-center justify-center gap-2"><Icon name="alert-circle" className="h-5 w-5" /> {errs.epicNo || "Error saving entry."}</div>}
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
